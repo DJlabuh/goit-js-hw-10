@@ -3,25 +3,23 @@ export function fetchCountries(name) {
   return fetch(url)
     .then(response => {
       if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error(`Oops, there is no country with that name`);
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then(data => {
-      const countries = data.map(country => ({
-        name: country.name.official,
-        capital: country.capital?.[0] || 'Unknown',
-        population: country.population || 'Unknown',
-        flag: country.flags?.svg || '',
-        languages: Object.values(country.languages),
-      }));
-      return countries;
-    })
+    .then(data => mapCountryData(data))
     .catch(error => {
       console.error(error);
       throw error;
     });
+}
+
+function mapCountryData(data) {
+  return data.map(country => ({
+    name: country.name.official,
+    capital: country.capital?.[0] || 'Unknown',
+    population: country.population || 'Unknown',
+    flag: country.flags?.svg || '',
+    languages: Object.values(country.languages),
+  }));
 }

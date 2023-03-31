@@ -14,6 +14,7 @@ searchBox.addEventListener(
   'input',
   debounce(() => {
     const searchTerm = searchBox.value.trim();
+    clearResults();
     if (searchTerm !== '') {
       fetchCountries(searchTerm)
         .then(countries => {
@@ -31,25 +32,31 @@ searchBox.addEventListener(
           console.error(error);
           Notiflix.Notify.failure(error.message);
         });
-    } else {
-      clearResults();
     }
   }, DEBOUNCE_DELAY)
 );
 
 function renderCountries(countries) {
   countryList.innerHTML = '';
-  countries.forEach(country => {
+  const listItems = countries.map(country => {
     const li = document.createElement('li');
     const img = document.createElement('img');
     img.src = country.flag;
     img.alt = `Flag of ${country.name}`;
     li.appendChild(img);
     li.appendChild(document.createTextNode(country.name));
-    li.addEventListener('click', () => {
-      displayCountryInfo(country);
-    });
-    countryList.appendChild(li);
+    return li;
+  });
+  countryList.append(...listItems);
+
+  countryList.addEventListener('click', event => {
+    const clickedListItem = event.target.closest('li');
+    if (clickedListItem && countryList.contains(clickedListItem)) {
+      const clickedCountry = countries.find(
+        country => country.name === clickedListItem.textContent
+      );
+      displayCountryInfo(clickedCountry);
+    }
   });
 }
 
@@ -63,9 +70,9 @@ function displayCountryInfo(country) {
     <p><strong>Languages:</strong> ${languages}</p>
   `;
   countryInfo.innerHTML = html;
-  clearResults();
 }
 
 function clearResults() {
   countryList.innerHTML = '';
+  countryInfo.innerHTML = '';
 }
